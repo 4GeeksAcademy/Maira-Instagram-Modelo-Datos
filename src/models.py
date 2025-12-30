@@ -12,7 +12,8 @@ class User(db.Model):
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
     posts: Mapped[list['Post']] = relationship(back_populates='user_who_posts')
     comments: Mapped[list['Comment']] = relationship(back_populates='commenting_user')
-
+    who_do_i_follow: Mapped[list['Follow']] = relationship(back_populates='')
+    who_follows_me: Mapped[list['Follow']] = relationship(back_populates='')
 
     def serialize(self):
         return {
@@ -21,18 +22,19 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
 
-# class Follow(db.Model):
-#     __tablename__ = 'follow'
-#     user_from_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-#     follower:
-#     user_to_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-#     to_follow:
+class Follow(db.Model):
+    __tablename__ = 'follow'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_from_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    follower: Mapped[list['User']] = relationship(back_populates='user.who_follows_me')
+    user_to_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    to_follow: Mapped[list['User']] = relationship(back_populates='user.who_do_i_follow')
 
 
 class Media(db.Model):
     __tablename__ = 'media'
     id: Mapped[int] = mapped_column(primary_key=True)
-    type: Mapped[int] = mapped_column(Integer)
+    type: Mapped[str] = mapped_column(String)
     url: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     post_id: Mapped[int] = mapped_column(ForeignKey('post.id'))
     the_post: Mapped['Post'] = relationship(back_populates='publications')
